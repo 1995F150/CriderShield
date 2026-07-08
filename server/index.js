@@ -6,6 +6,7 @@ const dnsServer = require('./dns/server');
 const dnsRoutes = require('./routes/dns');
 const logsRoutes = require('./routes/logs');
 const devicesRoutes = require('./routes/devices');
+const rulesRoutes = require('./routes/rules');
 const scanner = require('./services/scanner');
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/v1/telemetry', auth, telemetryRouter);
 app.use('/api/v1/dns', dnsRoutes);
 app.use('/api/v1/logs', logsRoutes);
 app.use('/api/v1/devices', devicesRoutes);
+app.use('/api/v1/rules', rulesRoutes);
 
 scanner.startScanner();
 
