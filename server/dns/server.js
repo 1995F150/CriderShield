@@ -1,34 +1,41 @@
 const dgram = require('dgram');
 const filter = require('./filter');
+const ruleEngine = require('../services/ruleEngine');
+const deviceDb = require('../database/deviceDb');
 
 function start() {
   const server = dgram.createSocket('udp4');
 
-  server.on('message', (msg, rinfo) => {
+  server.on('message', async (msg, rinfo) => {
     // Basic domain extraction (mocking binary parsing for now)
     const msgString = msg.toString('utf8');
     const domainMatch = msgString.match(/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
     const domain = domainMatch ? domainMatch[0] : 'unknown.local';
 
-    const result = filter.evaluate(domain, rinfo.address);
-    
-    console.log(`DNS Query: ${domain} from ${rinfo.address} - Action: ${result.action}`);
+    // Get device info to find MAC address for rule engine
+    deviceDb.getDevices((err, devices) => {
+      const device = devices ? devices.find(d => d.ip_address === rinfo.address) : null;
+      const macAddress = device ? device.mac_address : 'unknown';
 
-    // Mock forwarding/blocking behavior.
-    if (result.action === 'BLOCK') {
-       console.log(`Blocked ${domain}`);
-    } else {
-       console.log(`Forwarding ${domain} to 1.1.1.1`);
-    }
+      // Evaluate rules
+      ruleEngine.isBlocked(macAddress, domain).then(isRuleBlocked => {
+        let action = 'Allow';
+        
+        if (isRuleBlocked) {
+          action = 'Block (Rule)';
+        } else {
+          const filterResult = filter.evaluate(domain, rinfo.address);
+          action = filterResult.action;
+        }
+
+        console.log(`DNS Query: ${domain} from ${rinfo.address} (${macAddress}) - Action: ${action}`);
+        // In a real DNS server, logic to respond or block would go here.
+      });
+    });
   });
 
-  server.on('error', (err) => {
-    console.error(`DNS Server error: ${err.stack}`);
-    server.close();
-  });
-
-  server.bind(5300, () => {
-    console.log('DNS Filtering Server listening on port 5300');
+  server.bind(53, () => {
+    console.log('DNS Server listening on port 53');
   });
 }
 
