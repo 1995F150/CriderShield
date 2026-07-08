@@ -22,6 +22,7 @@ app.use('/api/v1/dns', dnsRoutes);
 app.use('/api/v1/logs', logsRoutes);
 app.use('/api/v1/devices', devicesRoutes);
 app.use('/api/v1/rules', rulesRoutes);
+app.use('/api/v1/analytics', require('./routes/analytics'));
 
 app.get('/api/v1/status', (req, res) => {
   res.json({ status: 'running' });
