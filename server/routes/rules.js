@@ -2,38 +2,35 @@ const express = require('express');
 const router = express.Router();
 const rulesDb = require('../database/rulesDb');
 
+// GET all rules
 router.get('/', (req, res) => {
-  rulesDb.getRules((err, rows) => {
+  rulesDb.getAll((err, rules) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
+    res.json(rules);
   });
 });
 
+// POST new rule
 router.post('/', (req, res) => {
-  rulesDb.addRule(req.body, (err) => {
+  rulesDb.create(req.body, (err, id) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(201).json({ id, ...req.body });
+  });
+});
+
+// PUT update rule
+router.put('/:id', (req, res) => {
+  rulesDb.update(req.params.id, req.body, (err) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true });
   });
 });
 
+// DELETE rule
 router.delete('/:id', (req, res) => {
-  rulesDb.deleteRule(req.params.id, (err) => {
+  rulesDb.delete(req.params.id, (err) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true });
-  });
-});
-
-router.get('/categories', (req, res) => {
-  rulesDb.getCategories((err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
-
-router.get('/schedules', (req, res) => {
-  rulesDb.getSchedules((err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
   });
 });
 
