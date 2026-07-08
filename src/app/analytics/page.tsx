@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { TrendChart } from '../../components/charts/LineChart';
-import { StatCard } from '../../components/dashboard/StatCard';
+import { StatCard } from '@/components/dashboard/StatCard';
 import { Activity, Shield, Percent } from 'lucide-react';
 
 export default function AnalyticsPage() {
