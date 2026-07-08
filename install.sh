@@ -1,8 +1,14 @@
 #!/bin/bash
 # CriderShield Installer for Ubuntu Server
+set -e
 
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root (sudo ./install.sh)"
+  exit 1
+fi
+
+if [ ! -f "package.json" ]; then
+  echo "Error: package.json not found! Please ensure you are in the CriderShield root directory."
   exit 1
 fi
 
@@ -18,8 +24,6 @@ chmod 755 data
 
 echo "--> Installing systemd service..."
 cp cridershield.service /etc/systemd/system/cridershield.service
-# Dynamically set the WorkingDirectory to the current path
-sed -i "s|WorkingDirectory=/opt/CriderShield|WorkingDirectory=$(pwd)|g" /etc/systemd/system/cridershield.service
 
 echo "--> Reloading systemd, enabling, and starting CriderShield..."
 systemctl daemon-reload
