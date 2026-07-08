@@ -4,6 +4,7 @@ const auth = require('./middleware/auth');
 const telemetryRouter = require('./routes/telemetry');
 const dnsServer = require('./dns/server');
 const dnsRoutes = require('./routes/dns');
+const logsRoutes = require('./routes/logs');
 
 const app = express();
 app.use(cors());
@@ -23,10 +24,10 @@ app.get('/api/v1/health', (req, res) => {
 
 app.use('/api/v1/telemetry', auth, telemetryRouter);
 app.use('/api/v1/dns', dnsRoutes);
+app.use('/api/v1/logs', logsRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`CriderShield API running on port ${PORT}`);
+  dnsServer.start();
 });
-
-dnsServer.start();
