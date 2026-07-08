@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import StatCard from '@/components/StatCard';
+import { StatCard } from '@/components/dashboard/StatCard';
 
 export default function DNSPage() {
   const [stats, setStats] = useState({ totalQueries: 0, blockedCount: 0 });
@@ -27,7 +27,7 @@ export default function DNSPage() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">DNS Filtering Dashboard</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <StatCard title="Total Queries" value={stats.totalQueries} />
         <StatCard title="Blocked Queries" value={stats.blockedCount} color="red" />
