@@ -15,25 +15,20 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/v1/health', (req, res) => {
-  res.json({
-    cpu: Math.floor(Math.random() * 100) + '%',
-    ram: Math.floor(Math.random() * 64) + ' GB',
-    storage: '45%',
-    uptime: '14d 2h 15m',
-    dnsRequests: Math.floor(Math.random() * 50000),
-    blockedRequests: Math.floor(Math.random() * 5000),
-    dockerStatus: 'Healthy'
-  });
-});
-
-app.use('/api/v1/telemetry', auth, telemetryRouter);
+// API Routes
+app.use('/api/v1/auth', auth.router);
+app.use('/api/v1/telemetry', telemetryRouter);
 app.use('/api/v1/dns', dnsRoutes);
 app.use('/api/v1/logs', logsRoutes);
 app.use('/api/v1/devices', devicesRoutes);
 app.use('/api/v1/rules', rulesRoutes);
 
-scanner.startScanner();
+app.get('/api/v1/status', (req, res) => {
+  res.json({ status: 'running' });
+});
+
+dnsServer.start();
+scanner.start();
 
 app.listen(PORT, () => {
   console.log(`CriderShield API running on port ${PORT}`);
