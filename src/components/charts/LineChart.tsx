@@ -1,7 +1,25 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
-export const TrendChart = ({ data }) => (
+type TrendChartDataPoint = {
+  time: string;
+  queries: number;
+  blocked: number;
+};
+
+type TrendChartProps = {
+  data: TrendChartDataPoint[];
+};
+
+export const TrendChart = ({ data }: TrendChartProps) => (
   <div className="h-64 w-full bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
     <h3 className="text-sm font-medium text-gray-500 mb-4">Query Trend (24h)</h3>
     <ResponsiveContainer width="100%" height="100%">
