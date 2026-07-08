@@ -1,7 +1,13 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const dbPath = process.env.DB_PATH || path.join(__dirname, '../../data/dns_logs.db');
-const db = new sqlite3.Database(dbPath);
+const fs = require('fs');
+
+const dataDir = path.join(__dirname, '../../data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+const db = new sqlite3.Database(path.join(dataDir, 'dns_logs.db'));
 
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS dns_logs (
@@ -45,6 +51,6 @@ const getLogs = (filters, limit, offset, callback) => {
 const cleanupLogs = (days = 30) => {
   db.run(`DELETE FROM dns_logs WHERE timestamp < datetime('now', '-${days} days')`);
 };
-setInterval(() => cleanupLogs(30), 86400000); // 30 days default retention cleanup
+setInterval(() => cleanupLogs(30), 864000000); // 30 days default retention cleanup
 
 module.exports = { insertLog, getLogs, db };
