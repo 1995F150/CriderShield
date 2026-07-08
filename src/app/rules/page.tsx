@@ -1,43 +1,103 @@
 'use client';
-import React, { useState, useEffect, FormEvent } from 'react';
+
+import React, { useState, useEffect } from 'react';
+
+type Rule = {
+  id: number;
+  priority?: number;
+  type?: string;
+  target?: string;
+  domain?: string;
+  category?: string;
+  action?: string;
+  enabled?: boolean | number;
+};
 
 export default function RulesPage() {
-  const [rules, setRules] = useState<any>([]);
-  const [editing, setEditing] = useState<any>(null);
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [editing, setEditing] = useState<Rule | null>(null);
 
-  useEffect(() => { fetch('/api/v1/rules').then(r => r.json()).then(setRules); }, []);
+  const loadRules = () => {
+    fetch('/api/v1/rules')
+      .then((r) => r.json())
+      .then(setRules);
+  };
+
+  useEffect(() => {
+    loadRules();
+  }, []);
 
   const save = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data: any = Object.fromEntries(new FormData(e.currentTarget));
-    data.enabled = data.enabled === 'on' ? 1 : 0;
+
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form)) as Record<string, FormDataEntryValue | boolean>;
+
+    data.enabled = data.enabled === 'on';
+
     await fetch(editing ? `/api/v1/rules/${editing.id}` : '/api/v1/rules', {
       method: editing ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
+
     setEditing(null);
-    fetch('/api/v1/rules').then(r => r.json()).then(setRules);
+    form.reset();
+    loadRules();
   };
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold">Rules</h1>
+
       <form onSubmit={save} className="my-4 grid grid-cols-2 gap-4 border p-4">
-        <select name="type" className="border p-2"><option value="global">Global</option><option value="device">Device</option></select>
+        <select name="type" className="border p-2">
+          <option value="global">Global</option>
+          <option value="device">Device</option>
+        </select>
+
         <input name="target" className="border p-2" placeholder="Target MAC" />
-        <select name="action" className="border p-2"><option value="BLOCK">Block</option><option value="ALLOW">Allow</option></select>
+
+        <select name="action" className="border p-2">
+          <option value="BLOCK">Block</option>
+          <option value="ALLOW">Allow</option>
+        </select>
+
         <input name="domain" className="border p-2" placeholder="domain.com" />
-        <select name="category" className="border p-2"><option value="">Category</option><option value="Ads">Ads</option></select>
-        <select name="schedule" className="border p-2"><option value="">Schedule</option><option value="school-hours">School Hours</option></select>
+
+        <select name="category" className="border p-2">
+          <option value="">Category</option>
+          <option value="Ads">Ads</option>
+        </select>
+
+        <select name="schedule" className="border p-2">
+          <option value="">Schedule</option>
+          <option value="school-hours">School Hours</option>
+        </select>
+
         <input name="priority" type="number" className="border p-2" placeholder="Priority" />
-        <label><input name="enabled" type="checkbox" defaultChecked /> Enabled</label>
+
+        <label>
+          <input name="enabled" type="checkbox" defaultChecked /> Enabled
+        </label>
+
         <button className="bg-blue-600 text-white p-2">Save Rule</button>
       </form>
+
       <table className="w-full border mt-4 text-left">
-        <thead className="bg-gray-100"><tr><th>Priority</th><th>Type</th><th>Rule</th><th>Action</th><th>Status</th><th>Actions</th></tr></thead>
+        <thead className="bg-gray-100">
+          <tr>
+            <th>Priority</th>
+            <th>Type</th>
+            <th>Rule</th>
+            <th>Action</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
         <tbody>
-          {rules.map((r: any) => (
+          {rules.map((r) => (
             <tr key={r.id} className="border-b">
               <td>{r.priority}</td>
               <td>{r.type}</td>
@@ -45,8 +105,18 @@ export default function RulesPage() {
               <td>{r.action}</td>
               <td>{r.enabled ? 'Enabled' : 'Disabled'}</td>
               <td>
-                <button onClick={() => setEditing(r)} className="mr-2 text-blue-600">Edit</button>
-                <button onClick={() => { fetch(`/api/v1/rules/${r.id}`, { method: 'DELETE' }).then(() => fetch('/api/v1/rules').then(r => r.json()).then(setRules)); }} className="text-red-600">Delete</button>
+                <button onClick={() => setEditing(r)} className="mr-2 text-blue-600">
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => {
+                    fetch(`/api/v1/rules/${r.id}`, { method: 'DELETE' }).then(loadRules);
+                  }}
+                  className="text-red-600"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
